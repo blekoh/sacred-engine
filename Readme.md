@@ -17,14 +17,6 @@ Sacred Engine uses the following open-source libraries:
  - vma
  - volk
  
- ## License
-Sacred Engine is licensed under the MIT license. See [LICENSE](LICENSE) for details.
-
-## Acknowledgements
-A huge thank you must be given to the following individuals and organizations for their incredibly useful resources:
- - Authors of https://vkguide.dev/
- - All authors and contributors to the open-source libraries mentioned above
- 
 ## Requirements
 The following is required for building the engine
  - Install vulkan sdk
@@ -35,5 +27,15 @@ The following is required for building the engine
  - Use cmake gui to configure the project and generate to the /build folder
  - Open with visual studio, build all, and set engine as default startup project
  - Engine should now run with f5
+ 
+ ## License
+Sacred Engine is licensed under the MIT license. See [LICENSE](LICENSE) for details.
+
+## Acknowledgements
+A huge thank you must be given to the following individuals and organizations for their incredibly useful resources:
+ - Authors of https://vkguide.dev/
+ - All authors and contributors to the open-source libraries mentioned above
+ 
+
 
 
