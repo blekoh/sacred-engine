@@ -1,6 +1,6 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Sacred Engine is a personal project to learn about Vulkan, rending, and all aspects of creating a game engine. It is not intended to be a fully use-able game engine nor is it intended for public use.
+Sacred Engine is a personal project to learn about Vulkan, rendering, and all aspects of creating a 3D game engine. It is not intended to be a fully use-able game engine nor is it intended for public use.
 
 ## Notable Features
 - Vulkan rendering backend
@@ -33,7 +33,7 @@ The following is required for building the engine
 
 ## Setup
  - Use cmake gui to configure the project and generate to the /build folder
- - Open with visual studio and set engine as default startup project
+ - Open with visual studio, build all, and set engine as default startup project
  - Engine should now run with f5
 
 
