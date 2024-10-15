@@ -80,11 +80,11 @@ void VulkanEngine::init()
     mainCamera.yaw = 0;
 
     //Move the camera to a good start position just for the test gltf scene
-    //mainCamera.position = glm::vec3(30.f, -00.f, -085.f);
+    mainCamera.position = glm::vec3(30.f, -00.f, -085.f);
 
 
     //Load a large gltf
-    std::string structurePath = { "..\\..\\assets\\structure.glb" };
+    std::string structurePath = { "..\\..\\assets\\sponza.glb" };
     auto structureFile = loadGltf(this, structurePath);
     assert(structureFile.has_value());
     loadedScenes["structure"] = *structureFile;
@@ -107,8 +107,6 @@ void VulkanEngine::cleanup()
 
         //Clear the loaded gltf
         loadedScenes.clear();
-
-
 
 
         //Destroy the command pool (this destroys all  command buffers allocated by the pool
@@ -1480,7 +1478,7 @@ void VulkanEngine::update_scene()
 
 
     //some default lighting parameters
-    sceneData.ambientColor = glm::vec4(.5f);
+    sceneData.ambientColor = glm::vec4(.7f);
     sceneData.sunlightColor = glm::vec4(1.f);
     sceneData.sunlightDirection = glm::vec4(0, 1, 0.5, 1.f);
 
