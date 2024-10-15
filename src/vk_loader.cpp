@@ -106,6 +106,46 @@ std::optional<std::vector<std::shared_ptr<MeshAsset>>> loadGltfMeshes(VulkanEngi
                     });
             }
 
+            // Tangent and Bitangent Calculation
+            std::vector<glm::vec3> tangents(vertices.size(), glm::vec3(0.0f));
+            std::vector<glm::vec3> bitangents(vertices.size(), glm::vec3(0.0f));
+
+            for (size_t i = 0; i < indices.size(); i += 3) {
+                uint32_t i0 = indices[i];
+                uint32_t i1 = indices[i + 1];
+                uint32_t i2 = indices[i + 2];
+
+                Vertex& v0 = vertices[i0];
+                Vertex& v1 = vertices[i1];
+                Vertex& v2 = vertices[i2];
+
+                glm::vec3 deltaPos1 = v1.position - v0.position;
+                glm::vec3 deltaPos2 = v2.position - v0.position;
+                glm::vec2 uv0 = glm::vec2(v0.uv_x, v0.uv_y);
+                glm::vec2 uv1 = glm::vec2(v1.uv_x, v1.uv_y);
+                glm::vec2 uv2 = glm::vec2(v2.uv_x, v2.uv_y);
+                glm::vec2 deltaUV1 = uv1 - uv0;
+                glm::vec2 deltaUV2 = uv2 - uv0;
+
+                float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+                glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+                glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+                tangents[i0] += tangent;
+                tangents[i1] += tangent;
+                tangents[i2] += tangent;
+                bitangents[i0] += bitangent;
+                bitangents[i1] += bitangent;
+                bitangents[i2] += bitangent;
+            }
+
+            // Normalize the tangents and bitangents
+            for (size_t i = 0; i < vertices.size(); i++) {
+                vertices[i].tangent = glm::normalize(tangents[i]);
+                vertices[i].bitangent = glm::normalize(bitangents[i]);
+            }
+
+
             // load vertex colors
             auto colors = p.findAttribute("COLOR_0");
             if (colors != p.attributes.end()) {
@@ -274,6 +314,20 @@ std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(VulkanEngine* engine, std::s
             materialResources.colorImage = images[img];
             materialResources.colorSampler = file.samplers[sampler];
         }
+
+        //load normal map
+        if (mat.normalTexture.has_value()) {
+            size_t img = gltf.textures[mat.normalTexture.value().textureIndex].imageIndex.value();
+            size_t sampler = gltf.textures[mat.normalTexture.value().textureIndex].samplerIndex.value();
+
+            materialResources.normalImage = images[img];  // Assuming you've created the normalImage field
+            materialResources.normalSampler = file.samplers[sampler];  // Bind the normal map sampler
+        }
+        else {
+            materialResources.normalImage = engine->_blackImage;  // Use a default flat normal map
+            materialResources.normalSampler = engine->_defaultSamplerLinear;
+        }
+
         // build material
         newMat->data = engine->metalRoughMaterial.write_material(engine->_device, passType, materialResources, file.descriptorPool);
 
@@ -352,6 +406,7 @@ std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(VulkanEngine* engine, std::s
                     });
             }
 
+
             // load vertex colors
             auto colors = p.findAttribute("COLOR_0");
             if (colors != p.attributes.end()) {
@@ -360,6 +415,45 @@ std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(VulkanEngine* engine, std::s
                     [&](glm::vec4 v, size_t index) {
                         vertices[initial_vtx + index].color = v;
                     });
+            }
+
+            // Tangent and Bitangent Calculation
+            std::vector<glm::vec3> tangents(vertices.size(), glm::vec3(0.0f));
+            std::vector<glm::vec3> bitangents(vertices.size(), glm::vec3(0.0f));
+
+            for (size_t i = 0; i < indices.size(); i += 3) {
+                uint32_t i0 = indices[i];
+                uint32_t i1 = indices[i + 1];
+                uint32_t i2 = indices[i + 2];
+
+                Vertex& v0 = vertices[i0];
+                Vertex& v1 = vertices[i1];
+                Vertex& v2 = vertices[i2];
+
+                glm::vec3 deltaPos1 = v1.position - v0.position;
+                glm::vec3 deltaPos2 = v2.position - v0.position;
+                glm::vec2 uv0 = glm::vec2(v0.uv_x, v0.uv_y);
+                glm::vec2 uv1 = glm::vec2(v1.uv_x, v1.uv_y);
+                glm::vec2 uv2 = glm::vec2(v2.uv_x, v2.uv_y);
+                glm::vec2 deltaUV1 = uv1 - uv0;
+                glm::vec2 deltaUV2 = uv2 - uv0;
+
+                float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+                glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+                glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+                tangents[i0] += tangent;
+                tangents[i1] += tangent;
+                tangents[i2] += tangent;
+                bitangents[i0] += bitangent;
+                bitangents[i1] += bitangent;
+                bitangents[i2] += bitangent;
+            }
+
+            // Normalize the tangents and bitangents
+            for (size_t i = 0; i < vertices.size(); i++) {
+                vertices[i].tangent = glm::normalize(tangents[i]);
+                vertices[i].bitangent = glm::normalize(bitangents[i]);
             }
 
             if (p.materialIndex.has_value()) {

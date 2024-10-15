@@ -8,6 +8,9 @@ Sacred Engine is a personal project to learn about Vulkan, rendering, and all as
 ![](github/images/se_sponza_screenshot_01.png)
 ** Testing with the Sponza Base Scene
 
+![](github/images/se_sponza_screenshot_01_with_normal.png)
+** Normal maps added in
+
 ## Dependencies
 Sacred Engine uses the following open-source libraries:
  - fastgltf

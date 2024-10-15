@@ -45,11 +45,15 @@ struct AllocatedBuffer {
 };
 
 struct Vertex {
-    glm::vec3 position;
-    float uv_x;
-    glm::vec3 normal;
-    float uv_y;
-    glm::vec4 color;
+    glm::vec3 position;   // 12 bytes
+    float uv_x;           // 4 bytes (aligns the next vec3 to 16 bytes)
+    glm::vec3 normal;     // 12 bytes
+    float uv_y;           // 4 bytes (aligns the next vec4 to 16 bytes)
+    glm::vec4 color;      // 16 bytes
+    glm::vec3 tangent;    // 12 bytes
+    float padding1;       // 4 bytes padding (to align to 16 bytes)
+    glm::vec3 bitangent;  // 12 bytes
+    float padding2;       // 4 bytes padding (to align to 16 bytes)
 };
 
 // holds the resources needed for a mesh
