@@ -1,0 +1,11 @@
+We set up a generic mesh pipeline with material definitions that mimic gltf. We added the new shaders and functions for this but are not currently using it. We do have some errors but we probably need to work through the next chapter and then solve the errors since they might go away with the new architecture we are working towards using IRenderable (mostly because clear_resources was not implemented yet and this will probably be called in cleanup()). 
+
+We then used the RenderObjects to render MeshNodes in the engine. A MeshNode holds  a mesh and can draw based on a transform. Since it inherits node it has as parent and children, children transforms get recursively updated with their parents topMatrix.
+
+We still have some errors with cleanup, I think we might have to implement clear_resources ourself.
+
+Added load image to the vk_loader to load textures in properly. Gltf files can now be loaded and rendered, transparency is handled by separated the draws so that opaque objects are drawn first, then transparent objects are drawn.
+
+Next chapter:
+
+https://vkguide.dev/docs/new_chapter_5/faster_draw/
