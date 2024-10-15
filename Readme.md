@@ -5,7 +5,7 @@ Sacred Engine is a personal project to learn about Vulkan, rendering, and all as
 ## Notable Features
 - Vulkan rendering backend
 
-![](sacred-engine/github/images/se_sponza_screenshot_01.png)
+![](github/images/se_sponza_screenshot_01.png)
 **GBuffer (top-left to bottom-right):** position, albedo, normal, final image, depth, metallic, AO, roughness
 
 ## Dependencies
