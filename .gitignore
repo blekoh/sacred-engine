@@ -2,3 +2,4 @@
 /bin
 /assets/brickadia
 /.vs
+/shaders/*.spv
