@@ -6,7 +6,7 @@ Sacred Engine is a personal project to learn about Vulkan, rendering, and all as
 - Vulkan rendering backend
 
 ![](github/images/se_sponza_screenshot_01.png)
-**Testing with the Sponza Base Scene
+** Testing with the Sponza Base Scene
 
 ## Dependencies
 Sacred Engine uses the following open-source libraries:
