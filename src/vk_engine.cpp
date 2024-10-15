@@ -35,8 +35,6 @@ constexpr bool bUseValidationLayers = true; //Should only be true for debug mode
 std::vector<ComputeEffect> backgroundEffects;
 int currentBackgroundEffect{ 0 };
 
-//Test gltf mesh
-std::vector<std::shared_ptr<MeshAsset>> testMeshes;
 
 bool resize_requested = false;
 
@@ -51,7 +49,7 @@ void VulkanEngine::init()
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 
     _window = SDL_CreateWindow(
-        "Vulkan Engine",
+        "Sacred Engine",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         _windowExtent.width,
@@ -105,10 +103,12 @@ void VulkanEngine::cleanup()
         //make sure the gpu has stopped doing its things
         vkDeviceWaitIdle(_device);
 
+        metalRoughMaterial.clear_resources(_device);
+
         //Clear the loaded gltf
         loadedScenes.clear();
 
-        metalRoughMaterial.clear_resources(_device);
+
 
 
         //Destroy the command pool (this destroys all  command buffers allocated by the pool
@@ -124,12 +124,6 @@ void VulkanEngine::cleanup()
             _frames[i]._deletionQueue.flush();
         }
 
-
-        //Cleanup all of our test meshes loaded from the gltf file
-        for (auto& mesh : testMeshes) {
-            destroy_buffer(mesh->meshBuffers.indexBuffer);
-            destroy_buffer(mesh->meshBuffers.vertexBuffer);
-        }
 
         //flush the global deletion queue
         _mainDeletionQueue.flush();
@@ -1037,8 +1031,6 @@ void VulkanEngine::init_mesh_pipeline()
 }
 
 void VulkanEngine::init_default_data() {
-    testMeshes = loadGltfMeshes(this, "..\\..\\assets\\basicmesh.glb").value();
-
     //3 default textures, white, grey, black. 1 pixel each
     uint32_t white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
     _whiteImage = create_image((void*)&white, VkExtent3D{ 1, 1, 1 }, VK_FORMAT_R8G8B8A8_UNORM,
@@ -1083,48 +1075,6 @@ void VulkanEngine::init_default_data() {
         destroy_image(_blackImage);
         destroy_image(_errorCheckerboardImage);
         });
-
-
-    //create the default MaterialInstance struct using the basic textures we just made
-    GLTFMetallic_Roughness::MaterialResources materialResources;
-    //default the material textures
-    materialResources.colorImage = _whiteImage;
-    materialResources.colorSampler = _defaultSamplerLinear;
-    materialResources.metalRoughImage = _whiteImage;
-    materialResources.metalRoughSampler = _defaultSamplerLinear;
-
-    //set the uniform buffer for the material data
-    AllocatedBuffer materialConstants = create_buffer(sizeof(GLTFMetallic_Roughness::MaterialConstants), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-    //write the buffer
-    GLTFMetallic_Roughness::MaterialConstants* sceneUniformData = (GLTFMetallic_Roughness::MaterialConstants*)materialConstants.allocation->GetMappedData();
-    sceneUniformData->colorFactors = glm::vec4{ 0.5,1,1,1 };
-    sceneUniformData->metal_rough_factors = glm::vec4{ 1,0.5,0,0 };
-
-    _mainDeletionQueue.push_function([=, this]() {
-        destroy_buffer(materialConstants);
-        });
-
-    materialResources.dataBuffer = materialConstants.buffer;
-    materialResources.dataBufferOffset = 0;
-
-    defaultData = metalRoughMaterial.write_material(_device, MaterialPass::MainColor, materialResources, globalDescriptorAllocator);
-
-
-    //Set up test meshes
-    for (auto& m : testMeshes) {
-        std::shared_ptr<MeshNode> newNode = std::make_shared<MeshNode>();
-        newNode->mesh = m;
-
-        newNode->localTransform = glm::mat4{ 1.f };
-        newNode->worldTransform = glm::mat4{ 1.f };
-
-        for (auto& s : newNode->mesh->surfaces) {
-            s.material = std::make_shared<GLTFMaterial>(defaultData);
-        }
-
-        loadedNodes[m->name] = std::move(newNode);
-    }
 }
 
 void VulkanEngine::create_swapchain(uint32_t width, uint32_t height)
@@ -1449,6 +1399,10 @@ void GLTFMetallic_Roughness::clear_resources(VkDevice device)
 {
     vkDestroyPipeline(device, opaquePipeline.pipeline, nullptr);
     vkDestroyPipeline(device, transparentPipeline.pipeline, nullptr);
+    vkDestroyPipelineLayout(device, transparentPipeline.layout, nullptr); //both opaque and transparent use the same layout
+    vkDestroyDescriptorSetLayout(device, materialLayout, nullptr);
+    
+        
 }
 
 MaterialInstance GLTFMetallic_Roughness::write_material(VkDevice device, MaterialPass pass, const MaterialResources& resources, DescriptorAllocatorGrowable& descriptorAllocator)
@@ -1508,10 +1462,6 @@ void VulkanEngine::update_scene()
 
     mainDrawContext.OpaqueSurfaces.clear();
 
-    //The monkey head node
-    loadedNodes["Suzanne"]->Draw(glm::mat4{ 1.f }, mainDrawContext);
-
-
 
     mainCamera.update();
 
@@ -1530,18 +1480,10 @@ void VulkanEngine::update_scene()
 
 
     //some default lighting parameters
-    sceneData.ambientColor = glm::vec4(.1f);
+    sceneData.ambientColor = glm::vec4(.5f);
     sceneData.sunlightColor = glm::vec4(1.f);
     sceneData.sunlightDirection = glm::vec4(0, 1, 0.5, 1.f);
 
-    //Demonstrate drawing some cubes with different transforms and scale
-    for (int x = -3; x < 3; x++) {
-
-        glm::mat4 scale = glm::scale(glm::vec3{ 0.2 });
-        glm::mat4 translation = glm::translate(glm::vec3{ x, 1, 0 });
-
-        loadedNodes["Cube"]->Draw(translation * scale, mainDrawContext);
-    }
 
     //Update the loaded gltf scene
     loadedScenes["structure"]->Draw(glm::mat4{ 1.f }, mainDrawContext);
