@@ -25,8 +25,9 @@ The following is required for building the engine
 
 ## Setup
  - Use cmake gui to configure the project and generate to the /build folder
- - Open with visual studio, build all, and set engine as default startup project
+ - Open with visual studio, build all projects, and set engine as default startup project
  - Engine should now run with f5
+ - Note: Adding shaders requires running cmake again and building the shaders project
  
  ## License
 Sacred Engine is licensed under the MIT license. See [LICENSE](LICENSE) for details.

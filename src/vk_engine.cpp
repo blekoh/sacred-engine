@@ -1098,7 +1098,7 @@ void VulkanEngine::init_default_data() {
 
     //write the buffer
     GLTFMetallic_Roughness::MaterialConstants* sceneUniformData = (GLTFMetallic_Roughness::MaterialConstants*)materialConstants.allocation->GetMappedData();
-    sceneUniformData->colorFactors = glm::vec4{ 1,1,1,1 };
+    sceneUniformData->colorFactors = glm::vec4{ 0.5,1,1,1 };
     sceneUniformData->metal_rough_factors = glm::vec4{ 1,0.5,0,0 };
 
     _mainDeletionQueue.push_function([=, this]() {
